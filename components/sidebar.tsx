@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Boxes,
   LayoutDashboard,
@@ -27,6 +27,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <aside className="flex h-dvh w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
@@ -52,12 +53,17 @@ export function Sidebar() {
           )
 
           if (item.href) {
+            const href = item.href
             return (
               <Link
                 key={item.label}
-                href={item.href}
+                href={href}
                 className={className}
                 aria-current={active ? "page" : undefined}
+                onClick={(e) => {
+                  e.preventDefault()
+                  router.push(href)
+                }}
               >
                 <Icon className="h-[18px] w-[18px]" />
                 {item.label}
