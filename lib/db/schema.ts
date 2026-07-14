@@ -38,5 +38,23 @@ export const inventoryMovements = pgTable("inventory_movements", {
     .defaultNow(),
 })
 
+export const vehicles = pgTable("vehicles", {
+  id: serial("id").primaryKey(),
+  plate: text("plate").notNull(),
+  model: text("model").notNull(),
+  brand: text("brand"),
+  type: text("type").notNull().default("Caminhão"), // 'Caminhão' | 'Carreta'
+  currentKm: integer("current_km").notNull().default(0),
+  initialKm: integer("initial_km").notNull().default(0),
+  status: text("status").notNull().default("Ativo"), // 'Ativo' | 'Manutenção' | 'Inativo'
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
 export type InventoryItem = typeof inventoryItems.$inferSelect
 export type InventoryMovement = typeof inventoryMovements.$inferSelect
+export type Vehicle = typeof vehicles.$inferSelect

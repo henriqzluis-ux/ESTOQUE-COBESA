@@ -12,18 +12,33 @@ import {
   Brain,
 } from "lucide-react"
 
-const navItems = [
-  { label: "Visão Geral", icon: LayoutDashboard, active: false },
-  { label: "Minha Frota", icon: Truck, active: false },
-  { label: "Almoxarifado", icon: Boxes, active: true },
-  { label: "Relatórios", icon: FileText, active: false },
-  { label: "Serviços", icon: Wrench, active: false },
-  { label: "Preventivas", icon: CalendarCheck, active: false },
-  { label: "Conferência Semanal", icon: ClipboardList, active: false },
-  { label: "Análise IA", icon: Brain, active: false },
+export type ViewKey =
+  | "overview"
+  | "fleet"
+  | "inventory"
+  | "reports"
+  | "services"
+  | "preventive"
+  | "weekly"
+  | "ai"
+
+const navItems: { key: ViewKey; label: string; icon: typeof Boxes }[] = [
+  { key: "overview", label: "Visão Geral", icon: LayoutDashboard },
+  { key: "fleet", label: "Minha Frota", icon: Truck },
+  { key: "inventory", label: "Almoxarifado", icon: Boxes },
+  { key: "reports", label: "Relatórios", icon: FileText },
+  { key: "services", label: "Serviços", icon: Wrench },
+  { key: "preventive", label: "Preventivas", icon: CalendarCheck },
+  { key: "weekly", label: "Conferência Semanal", icon: ClipboardList },
+  { key: "ai", label: "Análise IA", icon: Brain },
 ]
 
-export function Sidebar() {
+type Props = {
+  active: ViewKey
+  onSelect: (view: ViewKey) => void
+}
+
+export function Sidebar({ active, onSelect }: Props) {
   return (
     <aside className="flex h-dvh w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-3 px-6 py-6">
@@ -39,17 +54,19 @@ export function Sidebar() {
       <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
         {navItems.map((item) => {
           const Icon = item.icon
+          const isActive = item.key === active
           return (
             <button
-              key={item.label}
+              key={item.key}
               type="button"
+              onClick={() => onSelect(item.key)}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                item.active
+                isActive
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/20 hover:text-sidebar-foreground",
               )}
-              aria-current={item.active ? "page" : undefined}
+              aria-current={isActive ? "page" : undefined}
             >
               <Icon className="h-[18px] w-[18px]" />
               {item.label}
