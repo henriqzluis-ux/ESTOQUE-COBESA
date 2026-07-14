@@ -1,6 +1,8 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Boxes,
   LayoutDashboard,
@@ -13,17 +15,19 @@ import {
 } from "lucide-react"
 
 const navItems = [
-  { label: "Visão Geral", icon: LayoutDashboard, active: false },
-  { label: "Minha Frota", icon: Truck, active: false },
-  { label: "Almoxarifado", icon: Boxes, active: true },
-  { label: "Relatórios", icon: FileText, active: false },
-  { label: "Serviços", icon: Wrench, active: false },
-  { label: "Preventivas", icon: CalendarCheck, active: false },
-  { label: "Conferência Semanal", icon: ClipboardList, active: false },
-  { label: "Análise IA", icon: Brain, active: false },
+  { label: "Visão Geral", icon: LayoutDashboard, href: null },
+  { label: "Minha Frota", icon: Truck, href: "/frota" },
+  { label: "Almoxarifado", icon: Boxes, href: "/" },
+  { label: "Relatórios", icon: FileText, href: null },
+  { label: "Serviços", icon: Wrench, href: null },
+  { label: "Preventivas", icon: CalendarCheck, href: null },
+  { label: "Conferência Semanal", icon: ClipboardList, href: null },
+  { label: "Análise IA", icon: Brain, href: null },
 ]
 
 export function Sidebar() {
+  const pathname = usePathname()
+
   return (
     <aside className="flex h-dvh w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-3 px-6 py-6">
@@ -39,18 +43,30 @@ export function Sidebar() {
       <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
         {navItems.map((item) => {
           const Icon = item.icon
+          const active = item.href != null && pathname === item.href
+          const className = cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+            active
+              ? "bg-sidebar-primary text-sidebar-primary-foreground"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/20 hover:text-sidebar-foreground",
+          )
+
+          if (item.href) {
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={className}
+                aria-current={active ? "page" : undefined}
+              >
+                <Icon className="h-[18px] w-[18px]" />
+                {item.label}
+              </Link>
+            )
+          }
+
           return (
-            <button
-              key={item.label}
-              type="button"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                item.active
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/20 hover:text-sidebar-foreground",
-              )}
-              aria-current={item.active ? "page" : undefined}
-            >
+            <button key={item.label} type="button" className={className}>
               <Icon className="h-[18px] w-[18px]" />
               {item.label}
             </button>
