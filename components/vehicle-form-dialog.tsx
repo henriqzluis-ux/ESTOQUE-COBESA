@@ -131,7 +131,7 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle, onSaved }: Prop
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={status} onValueChange={(v) => setStatus(v ?? "")}>
                 <SelectTrigger id="status">
                   <SelectValue />
                 </SelectTrigger>

@@ -79,7 +79,7 @@ export function PreventiveFormDialog({ open, onOpenChange, vehicles, onSaved }: 
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-1.5">
             <Label htmlFor="vehicle">Veículo</Label>
-            <Select value={vehicleId} onValueChange={setVehicleId}>
+            <Select value={vehicleId} onValueChange={(v) => setVehicleId(v ?? "")}>
               <SelectTrigger id="vehicle">
                 <SelectValue placeholder="Selecione o veículo" />
               </SelectTrigger>

@@ -91,7 +91,7 @@ export function ServiceFormDialog({ open, onOpenChange, vehicles, onSaved }: Pro
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-1.5">
             <Label htmlFor="vehicle">Veículo</Label>
-            <Select value={vehicleId} onValueChange={setVehicleId}>
+            <Select value={vehicleId} onValueChange={(v) => setVehicleId(v ?? "")}>
               <SelectTrigger id="vehicle">
                 <SelectValue placeholder="Selecione o veículo" />
               </SelectTrigger>
@@ -108,7 +108,7 @@ export function ServiceFormDialog({ open, onOpenChange, vehicles, onSaved }: Pro
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1.5">
               <Label htmlFor="serviceType">Tipo</Label>
-              <Select value={serviceType} onValueChange={setServiceType}>
+              <Select value={serviceType} onValueChange={(v) => setServiceType(v ?? "")}>
                 <SelectTrigger id="serviceType">
                   <SelectValue />
                 </SelectTrigger>
