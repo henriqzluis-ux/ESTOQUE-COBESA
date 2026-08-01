@@ -51,6 +51,27 @@ export async function getStats() {
   return totals
 }
 
+export async function bulkImportItems(rows: ItemInput[]) {
+  const valid = rows.filter((r) => r.name && r.name.trim())
+  if (valid.length === 0) throw new Error("Nenhum item válido para importar")
+
+  await db.insert(inventoryItems).values(
+    valid.map((input) => ({
+      name: input.name.trim(),
+      reference: input.reference?.trim() || null,
+      category: input.category?.trim() || null,
+      manufacturer: input.manufacturer?.trim() || null,
+      quantity: input.quantity ?? 0,
+      minQuantity: input.minQuantity ?? 0,
+      unitPrice: String(input.unitPrice ?? 0),
+      location: input.location?.trim() || null,
+    })),
+  )
+
+  revalidatePath("/")
+  return valid.length
+}
+
 export async function createItem(input: ItemInput) {
   await db.insert(inventoryItems).values({
     name: input.name,
