@@ -10,10 +10,25 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { registerMovement } from "@/app/actions/inventory"
+import { getActiveVehicles } from "@/app/actions/withdrawals"
 import type { InventoryItem } from "@/lib/db/schema"
-import { useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
+
+type VehicleOption = {
+  id: number
+  plate: string
+  model: string | null
+  brand: string | null
+}
 
 type Props = {
   open: boolean
@@ -31,24 +46,53 @@ export function MovementDialog({
   onSaved,
 }: Props) {
   const [isPending, startTransition] = useTransition()
+  const [vehicles, setVehicles] = useState<VehicleOption[]>([])
+  const [vehicleId, setVehicleId] = useState<string>("")
+  const [quantity, setQuantity] = useState("")
+  const [note, setNote] = useState("")
+
+  const isEntrada = type === "entrada"
+
+  useEffect(() => {
+    if (open && !isEntrada) {
+      getActiveVehicles()
+        .then(setVehicles)
+        .catch(() => setVehicles([]))
+    }
+  }, [open, isEntrada])
+
+  useEffect(() => {
+    if (open) {
+      setVehicleId("")
+      setQuantity("")
+      setNote("")
+    }
+  }, [open])
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!item) return
-    const form = new FormData(e.currentTarget)
-    const quantity = Number(form.get("quantity") || 0)
-    const note = String(form.get("note") || "").trim()
+    const qty = Number(quantity || 0)
 
-    if (quantity <= 0) {
+    if (qty <= 0) {
       toast.error("Informe uma quantidade válida")
       return
     }
 
+    const selected = vehicles.find((v) => String(v.id) === vehicleId)
+
     startTransition(async () => {
       try {
-        await registerMovement(item.id, type, quantity, note)
+        await registerMovement(
+          item.id,
+          type,
+          qty,
+          note.trim() || undefined,
+          selected ? selected.id : null,
+          selected ? selected.plate : null,
+        )
         toast.success(
-          type === "entrada"
+          isEntrada
             ? "Entrada registrada com sucesso"
             : "Saída registrada com sucesso",
         )
@@ -61,8 +105,6 @@ export function MovementDialog({
       }
     })
   }
-
-  const isEntrada = type === "entrada"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -84,19 +126,53 @@ export function MovementDialog({
               <Label htmlFor="quantity">Quantidade</Label>
               <Input
                 id="quantity"
-                name="quantity"
                 type="number"
                 min={1}
                 placeholder="0"
                 autoFocus
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
               />
             </div>
+            {!isEntrada && (
+              <div className="grid gap-1.5">
+                <Label>Veículo (opcional)</Label>
+                <Select
+                  value={vehicleId}
+                  onValueChange={(v) => setVehicleId(v ?? "")}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o veículo">
+                      {(value: string) => {
+                        const v = vehicles.find((x) => String(x.id) === value)
+                        return v ? `${v.plate}${v.model ? ` — ${v.model}` : ""}` : ""
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicles.length === 0 ? (
+                      <SelectItem value="__none" disabled>
+                        Nenhum veículo cadastrado
+                      </SelectItem>
+                    ) : (
+                      vehicles.map((v) => (
+                        <SelectItem key={v.id} value={String(v.id)}>
+                          {v.plate}
+                          {v.model ? ` — ${v.model}` : ""}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="grid gap-1.5">
               <Label htmlFor="note">Observação (opcional)</Label>
               <Input
                 id="note"
-                name="note"
-                placeholder={isEntrada ? "Nota fiscal, fornecedor..." : "Veículo, OS..."}
+                placeholder={isEntrada ? "Nota fiscal, fornecedor..." : "OS, responsável..."}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
               />
             </div>
             <DialogFooter className="gap-2 sm:gap-2">

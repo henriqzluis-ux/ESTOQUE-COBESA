@@ -9,7 +9,7 @@ import { PreventivesView } from "@/components/preventives-view"
 import { ConferenceView } from "@/components/conference-view"
 import { OverviewView } from "@/components/overview-view"
 import { ReportsView } from "@/components/reports-view"
-import { AiAnalysisView } from "@/components/ai-analysis-view"
+import { WithdrawalsView } from "@/components/withdrawals-view"
 
 export function AppShell() {
   const [view, setView] = useState<ViewKey>("visao-geral")
@@ -21,11 +21,11 @@ export function AppShell() {
         {view === "visao-geral" && <OverviewView onNavigate={setView} />}
         {view === "frota" && <FleetView />}
         {view === "almoxarifado" && <InventoryView />}
+        {view === "retiradas" && <WithdrawalsView />}
         {view === "relatorios" && <ReportsView />}
         {view === "servicos" && <ServicesView />}
         {view === "preventivas" && <PreventivesView onNavigate={setView} />}
         {view === "conferencia" && <ConferenceView />}
-        {view === "analise-ia" && <AiAnalysisView />}
       </div>
     </main>
   )

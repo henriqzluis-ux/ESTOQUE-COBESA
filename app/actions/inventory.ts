@@ -117,6 +117,8 @@ export async function registerMovement(
   type: "entrada" | "saida",
   quantity: number,
   note?: string,
+  vehicleId?: number | null,
+  vehiclePlate?: string | null,
 ) {
   if (quantity <= 0) throw new Error("Quantidade deve ser maior que zero")
 
@@ -139,6 +141,8 @@ export async function registerMovement(
     type,
     quantity,
     note: note || null,
+    vehicleId: type === "saida" ? vehicleId ?? null : null,
+    vehiclePlate: type === "saida" ? vehiclePlate ?? null : null,
   })
 
   await db

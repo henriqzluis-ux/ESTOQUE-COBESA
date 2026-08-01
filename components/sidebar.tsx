@@ -9,28 +9,28 @@ import {
   Wrench,
   CalendarCheck,
   ClipboardList,
-  Brain,
+  PackageMinus,
 } from "lucide-react"
 
 export type ViewKey =
   | "visao-geral"
   | "frota"
   | "almoxarifado"
+  | "retiradas"
   | "relatorios"
   | "servicos"
   | "preventivas"
   | "conferencia"
-  | "analise-ia"
 
 const navItems: { key: ViewKey; label: string; icon: typeof Boxes }[] = [
   { key: "visao-geral", label: "Visão Geral", icon: LayoutDashboard },
   { key: "frota", label: "Minha Frota", icon: Truck },
   { key: "almoxarifado", label: "Almoxarifado", icon: Boxes },
+  { key: "retiradas", label: "Retiradas por Veículo", icon: PackageMinus },
   { key: "relatorios", label: "Relatórios", icon: FileText },
   { key: "servicos", label: "Serviços", icon: Wrench },
   { key: "preventivas", label: "Preventivas", icon: CalendarCheck },
   { key: "conferencia", label: "Conferência Semanal", icon: ClipboardList },
-  { key: "analise-ia", label: "Análise IA", icon: Brain },
 ]
 
 type Props = {

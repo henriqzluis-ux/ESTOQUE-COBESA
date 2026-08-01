@@ -33,6 +33,8 @@ export const inventoryMovements = pgTable("inventory_movements", {
   type: text("type").notNull(), // 'entrada' | 'saida'
   quantity: integer("quantity").notNull(),
   note: text("note"),
+  vehicleId: integer("vehicle_id"),
+  vehiclePlate: text("vehicle_plate"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
