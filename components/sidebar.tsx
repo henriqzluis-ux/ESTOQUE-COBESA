@@ -10,12 +10,14 @@ import {
   CalendarCheck,
   ClipboardList,
   PackageMinus,
+  AlertTriangle,
 } from "lucide-react"
 
 export type ViewKey =
   | "visao-geral"
   | "frota"
   | "almoxarifado"
+  | "estoque-critico"
   | "retiradas"
   | "relatorios"
   | "servicos"
@@ -26,6 +28,7 @@ const navItems: { key: ViewKey; label: string; icon: typeof Boxes }[] = [
   { key: "visao-geral", label: "Visão Geral", icon: LayoutDashboard },
   { key: "frota", label: "Minha Frota", icon: Truck },
   { key: "almoxarifado", label: "Almoxarifado", icon: Boxes },
+  { key: "estoque-critico", label: "Estoque Crítico", icon: AlertTriangle },
   { key: "retiradas", label: "Retiradas por Veículo", icon: PackageMinus },
   { key: "relatorios", label: "Relatórios", icon: FileText },
   { key: "servicos", label: "Serviços", icon: Wrench },

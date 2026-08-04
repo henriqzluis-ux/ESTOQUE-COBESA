@@ -39,6 +39,14 @@ export async function getItems(search?: string) {
     .orderBy(desc(inventoryItems.createdAt))
 }
 
+export async function getCriticalItems() {
+  return db
+    .select()
+    .from(inventoryItems)
+    .where(sql`${inventoryItems.quantity} <= ${inventoryItems.minQuantity}`)
+    .orderBy(inventoryItems.quantity, desc(inventoryItems.createdAt))
+}
+
 export async function getStats() {
   const [totals] = await db
     .select({

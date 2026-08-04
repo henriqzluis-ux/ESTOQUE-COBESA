@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Sidebar, type ViewKey } from "@/components/sidebar"
 import { InventoryView } from "@/components/inventory-view"
+import { CriticalStockView } from "@/components/critical-stock-view"
 import { FleetView } from "@/components/fleet-view"
 import { ServicesView } from "@/components/services-view"
 import { PreventivesView } from "@/components/preventives-view"
@@ -21,6 +22,7 @@ export function AppShell() {
         {view === "visao-geral" && <OverviewView onNavigate={setView} />}
         {view === "frota" && <FleetView />}
         {view === "almoxarifado" && <InventoryView />}
+        {view === "estoque-critico" && <CriticalStockView />}
         {view === "retiradas" && <WithdrawalsView />}
         {view === "relatorios" && <ReportsView />}
         {view === "servicos" && <ServicesView />}
