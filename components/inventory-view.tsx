@@ -20,9 +20,11 @@ import {
   Plus,
   Search,
   Trash2,
+  Upload,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { toast } from "sonner"
+import { ImportDialog } from "./import-dialog"
 import { ItemFormDialog } from "./item-form-dialog"
 import { MovementDialog } from "./movement-dialog"
 
@@ -53,6 +55,8 @@ export function InventoryView() {
   const [movementOpen, setMovementOpen] = useState(false)
   const [movementType, setMovementType] = useState<"entrada" | "saida">("entrada")
   const [movementItem, setMovementItem] = useState<InventoryItem | null>(null)
+
+  const [importOpen, setImportOpen] = useState(false)
 
   const load = useCallback(async (term: string) => {
     const [list, s] = await Promise.all([getItems(term), getStats()])
@@ -180,6 +184,10 @@ export function InventoryView() {
               className="pl-9"
             />
           </div>
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <Upload className="h-4 w-4" />
+            Importar
+          </Button>
           <Button onClick={openNew}>
             <Plus className="h-4 w-4" />
             Novo Item
@@ -315,6 +323,11 @@ export function InventoryView() {
         type={movementType}
         item={movementItem}
         onSaved={refresh}
+      />
+      <ImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImported={refresh}
       />
     </div>
   )
