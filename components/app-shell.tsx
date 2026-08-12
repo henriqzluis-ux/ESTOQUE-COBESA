@@ -7,7 +7,7 @@ import { CriticalStockView } from "@/components/critical-stock-view"
 import { FleetView } from "@/components/fleet-view"
 import { ServicesView } from "@/components/services-view"
 import { PreventivesView } from "@/components/preventives-view"
-import { ConferenceView } from "@/components/conference-view"
+import { StockMovementsView } from "@/components/stock-movements-view"
 import { OverviewView } from "@/components/overview-view"
 import { ReportsView } from "@/components/reports-view"
 import { WithdrawalsView } from "@/components/withdrawals-view"
@@ -27,7 +27,7 @@ export function AppShell() {
         {view === "relatorios" && <ReportsView />}
         {view === "servicos" && <ServicesView />}
         {view === "preventivas" && <PreventivesView onNavigate={setView} />}
-        {view === "conferencia" && <ConferenceView />}
+        {view === "movimentacao" && <StockMovementsView />}
       </div>
     </main>
   )

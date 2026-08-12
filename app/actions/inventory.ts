@@ -130,6 +130,10 @@ export async function registerMovement(
 ) {
   if (quantity <= 0) throw new Error("Quantidade deve ser maior que zero")
 
+  if (type === "saida" && !note?.trim()) {
+    throw new Error("A observação é obrigatória para registrar uma saída")
+  }
+
   const [item] = await db
     .select()
     .from(inventoryItems)
@@ -169,8 +173,11 @@ export async function getMovements(itemId?: number) {
       type: inventoryMovements.type,
       quantity: inventoryMovements.quantity,
       note: inventoryMovements.note,
+      vehiclePlate: inventoryMovements.vehiclePlate,
       createdAt: inventoryMovements.createdAt,
       itemName: inventoryItems.name,
+      itemReference: inventoryItems.reference,
+      unitPrice: inventoryItems.unitPrice,
     })
     .from(inventoryMovements)
     .leftJoin(
@@ -178,7 +185,7 @@ export async function getMovements(itemId?: number) {
       eq(inventoryMovements.itemId, inventoryItems.id),
     )
     .orderBy(desc(inventoryMovements.createdAt))
-    .limit(50)
+    .limit(itemId ? 50 : 300)
 
   if (itemId) {
     return base.where(eq(inventoryMovements.itemId, itemId))

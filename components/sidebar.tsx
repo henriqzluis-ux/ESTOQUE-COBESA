@@ -8,7 +8,7 @@ import {
   FileText,
   Wrench,
   CalendarCheck,
-  ClipboardList,
+  ArrowLeftRight,
   PackageMinus,
   AlertTriangle,
 } from "lucide-react"
@@ -22,7 +22,7 @@ export type ViewKey =
   | "relatorios"
   | "servicos"
   | "preventivas"
-  | "conferencia"
+  | "movimentacao"
 
 const navItems: { key: ViewKey; label: string; icon: typeof Boxes }[] = [
   { key: "visao-geral", label: "Visão Geral", icon: LayoutDashboard },
@@ -33,7 +33,7 @@ const navItems: { key: ViewKey; label: string; icon: typeof Boxes }[] = [
   { key: "relatorios", label: "Relatórios", icon: FileText },
   { key: "servicos", label: "Serviços", icon: Wrench },
   { key: "preventivas", label: "Preventivas", icon: CalendarCheck },
-  { key: "conferencia", label: "Conferência Semanal", icon: ClipboardList },
+  { key: "movimentacao", label: "Movimentação no Estoque", icon: ArrowLeftRight },
 ]
 
 type Props = {

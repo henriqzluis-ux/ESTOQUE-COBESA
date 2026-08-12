@@ -79,6 +79,11 @@ export function MovementDialog({
       return
     }
 
+    if (!isEntrada && !note.trim()) {
+      toast.error("A observação é obrigatória para registrar uma saída")
+      return
+    }
+
     const selected = vehicles.find((v) => String(v.id) === vehicleId)
 
     startTransition(async () => {
@@ -167,10 +172,14 @@ export function MovementDialog({
               </div>
             )}
             <div className="grid gap-1.5">
-              <Label htmlFor="note">Observação (opcional)</Label>
+              <Label htmlFor="note">
+                {isEntrada ? "Observação (opcional)" : "Observação"}
+                {!isEntrada && <span className="text-destructive"> *</span>}
+              </Label>
               <Input
                 id="note"
-                placeholder={isEntrada ? "Nota fiscal, fornecedor..." : "OS, responsável..."}
+                required={!isEntrada}
+                placeholder={isEntrada ? "Nota fiscal, fornecedor..." : "OS, responsável, motivo da retirada..."}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
