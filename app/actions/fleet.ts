@@ -61,6 +61,14 @@ export async function updateVehicle(id: number, input: VehicleInput) {
   revalidatePath("/")
 }
 
+export async function updateVehicleKm(id: number, currentKm: number) {
+  await db
+    .update(vehicles)
+    .set({ currentKm, updatedAt: new Date() })
+    .where(eq(vehicles.id, id))
+  revalidatePath("/")
+}
+
 export async function deleteVehicle(id: number) {
   await db.delete(preventives).where(eq(preventives.vehicleId, id))
   await db.delete(services).where(eq(services.vehicleId, id))

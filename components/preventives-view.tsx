@@ -7,14 +7,23 @@ import {
   markPreventiveDone,
 } from "@/app/actions/preventives"
 import { KM_ALERTA, KM_CRITICO } from "@/lib/preventive-status"
-import { getVehicles } from "@/app/actions/fleet"
+import { getVehicles, updateVehicleKm } from "@/app/actions/fleet"
 import type { Vehicle } from "@/lib/db/schema"
 import type { ViewKey } from "@/components/sidebar"
-import { CalendarCheck, CheckCircle2, Plus, Trash2 } from "lucide-react"
+import { CalendarCheck, CheckCircle2, Gauge, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 import { PageHeader } from "./page-header"
 import { PreventiveFormDialog } from "./preventive-form-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 type PreventiveRow = {
   id: number
@@ -69,6 +78,8 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
   const [loading, setLoading] = useState(true)
   const [, startTransition] = useTransition()
   const [formOpen, setFormOpen] = useState(false)
+  const [kmTarget, setKmTarget] = useState<PreventiveRow | null>(null)
+  const [kmValue, setKmValue] = useState("")
 
   const load = useCallback(async () => {
     const [list, vlist] = await Promise.all([getPreventives(), getVehicles()])
@@ -93,6 +104,35 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
         load()
       } catch {
         toast.error("Erro ao atualizar a preventiva")
+      }
+    })
+  }
+
+  function openKmDialog(p: PreventiveRow) {
+    setKmTarget(p)
+    setKmValue(String(p.currentKm))
+  }
+
+  function handleUpdateKm() {
+    if (!kmTarget) return
+    const km = Number(kmValue)
+    if (!Number.isFinite(km) || km < 0) {
+      toast.error("Informe um valor de km válido")
+      return
+    }
+    if (km < kmTarget.lastKm) {
+      toast.error("O km atual não pode ser menor que o da última preventiva")
+      return
+    }
+    const target = kmTarget
+    startTransition(async () => {
+      try {
+        await updateVehicleKm(target.vehicleId, km)
+        toast.success("KM do veículo atualizado")
+        setKmTarget(null)
+        load()
+      } catch {
+        toast.error("Erro ao atualizar o KM")
       }
     })
   }
@@ -233,6 +273,15 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
                               <Button
                                 variant="ghost"
                                 size="icon"
+                                className="h-8 w-8 text-muted-foreground"
+                                title="Atualizar KM rodados"
+                                onClick={() => openKmDialog(p)}
+                              >
+                                <Gauge className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 className="h-8 w-8 text-primary"
                                 title="Marcar como realizada"
                                 onClick={() => handleDone(p)}
@@ -267,6 +316,50 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
         vehicles={vehicles}
         onSaved={refresh}
       />
+
+      <Dialog open={kmTarget !== null} onOpenChange={(o) => !o && setKmTarget(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Atualizar KM rodados</DialogTitle>
+          </DialogHeader>
+          {kmTarget && (
+            <div className="flex flex-col gap-4">
+              <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
+                <p className="font-semibold text-foreground">{kmTarget.vehiclePlate}</p>
+                <p className="text-muted-foreground">{kmTarget.description}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Última preventiva: {kmTarget.lastKm.toLocaleString("pt-BR")} km
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="km-atual">KM atual do veículo</Label>
+                <Input
+                  id="km-atual"
+                  type="number"
+                  min={kmTarget.lastKm}
+                  value={kmValue}
+                  onChange={(e) => setKmValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.nativeEvent.isComposing) handleUpdateKm()
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Rodados desde a última:{" "}
+                  <span className="font-semibold text-foreground">
+                    {Math.max(0, (Number(kmValue) || 0) - kmTarget.lastKm).toLocaleString("pt-BR")} km
+                  </span>
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setKmTarget(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateKm}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
