@@ -6,13 +6,14 @@ import {
   getPreventives,
   markPreventiveDone,
 } from "@/app/actions/preventives"
+import { KM_ALERTA, KM_CRITICO } from "@/lib/preventive-status"
 import { getVehicles } from "@/app/actions/fleet"
 import type { Vehicle } from "@/lib/db/schema"
 import type { ViewKey } from "@/components/sidebar"
 import { CalendarCheck, CheckCircle2, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
-import { PageHeader, StatusBadge } from "./page-header"
+import { PageHeader } from "./page-header"
 import { PreventiveFormDialog } from "./preventive-form-dialog"
 
 type PreventiveRow = {
@@ -25,12 +26,41 @@ type PreventiveRow = {
   nextKm: number
   status: string
   currentKm: number
+  kmRodados: number
 }
 
-const statusMap: Record<string, { label: string; tone: "success" | "warning" | "danger" | "neutral" }> = {
-  em_dia: { label: "Em dia", tone: "success" },
-  proximo: { label: "Próximo", tone: "warning" },
-  vencido: { label: "Vencido", tone: "danger" },
+const statusMap: Record<
+  string,
+  { label: string; dot: string; text: string; badge: string }
+> = {
+  em_dia: {
+    label: "Em dia",
+    dot: "bg-emerald-500 shadow-[0_0_10px_2px] shadow-emerald-500/50",
+    text: "text-emerald-600",
+    badge: "bg-emerald-500/10 text-emerald-600",
+  },
+  alerta: {
+    label: "Alerta",
+    dot: "bg-amber-500 shadow-[0_0_10px_2px] shadow-amber-500/50",
+    text: "text-amber-600",
+    badge: "bg-amber-500/10 text-amber-600",
+  },
+  critico: {
+    label: "Crítico",
+    dot: "bg-red-500 shadow-[0_0_10px_2px] shadow-red-500/50 animate-pulse",
+    text: "text-red-600",
+    badge: "bg-red-500/10 text-red-600",
+  },
+}
+
+function StatusDot({ status }: { status: string }) {
+  const st = statusMap[status] ?? statusMap.em_dia
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={`h-3 w-3 shrink-0 rounded-full ${st.dot}`} aria-hidden />
+      <span className={`text-xs font-semibold ${st.text}`}>{st.label}</span>
+    </span>
+  )
 }
 
 export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
@@ -81,8 +111,8 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
   }
 
   const counts = {
-    vencido: rows.filter((r) => r.status === "vencido").length,
-    proximo: rows.filter((r) => r.status === "proximo").length,
+    critico: rows.filter((r) => r.status === "critico").length,
+    alerta: rows.filter((r) => r.status === "alerta").length,
     em_dia: rows.filter((r) => r.status === "em_dia").length,
   }
 
@@ -115,18 +145,45 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
       ) : (
         <>
           <div className="grid grid-cols-3 gap-4">
-            <div className="rounded-xl border border-border bg-card p-4">
-              <p className="text-xs text-muted-foreground">Vencidas</p>
-              <p className="text-xl font-bold text-destructive">{counts.vencido}</p>
+            <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+              <span className="h-3 w-3 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_10px_2px] shadow-emerald-500/50" />
+              <div>
+                <p className="text-xs text-muted-foreground">Em dia</p>
+                <p className="text-xl font-bold text-emerald-600">{counts.em_dia}</p>
+              </div>
             </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <p className="text-xs text-muted-foreground">Próximas</p>
-              <p className="text-xl font-bold text-amber-600">{counts.proximo}</p>
+            <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+              <span className="h-3 w-3 shrink-0 rounded-full bg-amber-500 shadow-[0_0_10px_2px] shadow-amber-500/50" />
+              <div>
+                <p className="text-xs text-muted-foreground">Alerta</p>
+                <p className="text-xl font-bold text-amber-600">{counts.alerta}</p>
+              </div>
             </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <p className="text-xs text-muted-foreground">Em dia</p>
-              <p className="text-xl font-bold text-primary">{counts.em_dia}</p>
+            <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+              <span className="h-3 w-3 shrink-0 rounded-full bg-red-500 shadow-[0_0_10px_2px] shadow-red-500/50" />
+              <div>
+                <p className="text-xs text-muted-foreground">Crítico</p>
+                <p className="text-xl font-bold text-red-600">{counts.critico}</p>
+              </div>
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-border bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Legenda de km rodados:</span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              {"< "}
+              {KM_ALERTA.toLocaleString("pt-BR")} km — Em dia
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+              {KM_ALERTA.toLocaleString("pt-BR")} a {KM_CRITICO.toLocaleString("pt-BR")} km — Alerta
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+              {"≥ "}
+              {KM_CRITICO.toLocaleString("pt-BR")} km — Crítico
+            </span>
           </div>
 
           <div className="rounded-xl border border-border bg-card">
@@ -146,8 +203,8 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
                       <th className="px-4 py-3 font-medium">Veículo</th>
                       <th className="px-4 py-3 font-medium">Descrição</th>
                       <th className="px-4 py-3 text-right font-medium">Última (km)</th>
-                      <th className="px-4 py-3 text-right font-medium">Próxima (km)</th>
-                      <th className="px-4 py-3 text-right font-medium">Faltam</th>
+                      <th className="px-4 py-3 text-right font-medium">Atual (km)</th>
+                      <th className="px-4 py-3 text-right font-medium">Rodados</th>
                       <th className="px-4 py-3 font-medium">Status</th>
                       <th className="px-4 py-3 text-right font-medium">Ações</th>
                     </tr>
@@ -155,7 +212,6 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
                   <tbody>
                     {rows.map((p) => {
                       const st = statusMap[p.status] ?? statusMap.em_dia
-                      const remaining = p.nextKm - p.currentKm
                       return (
                         <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/40">
                           <td className="px-4 py-3 font-semibold text-foreground">{p.vehiclePlate}</td>
@@ -164,13 +220,13 @@ export function PreventivesView({ onNavigate }: { onNavigate: (v: ViewKey) => vo
                             {p.lastKm.toLocaleString("pt-BR")}
                           </td>
                           <td className="px-4 py-3 text-right text-foreground">
-                            {p.nextKm.toLocaleString("pt-BR")}
+                            {p.currentKm.toLocaleString("pt-BR")}
                           </td>
-                          <td className="px-4 py-3 text-right text-muted-foreground">
-                            {remaining > 0 ? `${remaining.toLocaleString("pt-BR")} km` : "Vencida"}
+                          <td className={`px-4 py-3 text-right font-semibold ${st.text}`}>
+                            {p.kmRodados.toLocaleString("pt-BR")} km
                           </td>
                           <td className="px-4 py-3">
-                            <StatusBadge label={st.label} tone={st.tone} />
+                            <StatusDot status={p.status} />
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-end gap-1">

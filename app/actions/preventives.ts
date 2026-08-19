@@ -4,19 +4,13 @@ import { db } from "@/lib/db"
 import { preventives, vehicles } from "@/lib/db/schema"
 import { desc, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
+import { computeStatus } from "@/lib/preventive-status"
 
 export type PreventiveInput = {
   vehicleId: number
   description: string
   intervalKm?: number
   lastKm?: number
-}
-
-function computeStatus(nextKm: number, currentKm: number): string {
-  const remaining = nextKm - currentKm
-  if (remaining <= 0) return "vencido"
-  if (remaining <= 1000) return "proximo"
-  return "em_dia"
 }
 
 export async function getPreventives() {
@@ -37,12 +31,16 @@ export async function getPreventives() {
     .leftJoin(vehicles, eq(preventives.vehicleId, vehicles.id))
     .orderBy(desc(preventives.createdAt))
 
-  // Recalcula status com base no KM atual do veículo
-  return rows.map((r) => ({
-    ...r,
-    currentKm: r.currentKm ?? r.lastKm,
-    status: computeStatus(r.nextKm, r.currentKm ?? r.lastKm),
-  }))
+  // Recalcula status com base nos km rodados desde a última preventiva
+  return rows.map((r) => {
+    const currentKm = r.currentKm ?? r.lastKm
+    return {
+      ...r,
+      currentKm,
+      kmRodados: Math.max(0, currentKm - r.lastKm),
+      status: computeStatus(r.lastKm, currentKm),
+    }
+  })
 }
 
 export async function createPreventive(input: PreventiveInput) {
@@ -64,7 +62,7 @@ export async function createPreventive(input: PreventiveInput) {
     intervalKm: interval,
     lastKm,
     nextKm,
-    status: computeStatus(nextKm, vehicle.currentKm),
+    status: computeStatus(lastKm, vehicle.currentKm),
   })
   revalidatePath("/")
 }
@@ -83,7 +81,7 @@ export async function markPreventiveDone(id: number) {
     .set({
       lastKm: currentKm,
       nextKm,
-      status: computeStatus(nextKm, currentKm),
+      status: computeStatus(currentKm, currentKm),
     })
     .where(eq(preventives.id, id))
   revalidatePath("/")
