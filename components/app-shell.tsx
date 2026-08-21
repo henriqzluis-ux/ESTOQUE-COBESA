@@ -11,6 +11,7 @@ import { ConferenceView } from "@/components/conference-view"
 import { OverviewView } from "@/components/overview-view"
 import { ReportsView } from "@/components/reports-view"
 import { WithdrawalsView } from "@/components/withdrawals-view"
+import { StockMovementsView } from "@/components/stock-movements-view"
 
 export function AppShell() {
   const [view, setView] = useState<ViewKey>("visao-geral")
@@ -23,6 +24,7 @@ export function AppShell() {
         {view === "frota" && <FleetView />}
         {view === "almoxarifado" && <InventoryView />}
         {view === "estoque-critico" && <CriticalStockView />}
+        {view === "movimentacao" && <StockMovementsView />}
         {view === "retiradas" && <WithdrawalsView />}
         {view === "relatorios" && <ReportsView />}
         {view === "servicos" && <ServicesView />}

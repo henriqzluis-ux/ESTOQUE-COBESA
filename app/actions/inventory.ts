@@ -161,6 +161,27 @@ export async function registerMovement(
   revalidatePath("/")
 }
 
+export async function getStockMovements(type?: "entrada" | "saida") {
+  const rows = await db
+    .select({
+      id: inventoryMovements.id,
+      itemId: inventoryMovements.itemId,
+      type: inventoryMovements.type,
+      quantity: inventoryMovements.quantity,
+      note: inventoryMovements.note,
+      vehiclePlate: inventoryMovements.vehiclePlate,
+      createdAt: inventoryMovements.createdAt,
+      itemName: inventoryItems.name,
+      itemReference: inventoryItems.reference,
+    })
+    .from(inventoryMovements)
+    .leftJoin(inventoryItems, eq(inventoryMovements.itemId, inventoryItems.id))
+    .where(type ? eq(inventoryMovements.type, type) : undefined)
+    .orderBy(desc(inventoryMovements.createdAt))
+    .limit(300)
+  return rows
+}
+
 export async function getMovements(itemId?: number) {
   const base = db
     .select({
