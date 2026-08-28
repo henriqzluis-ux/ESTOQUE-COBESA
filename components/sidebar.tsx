@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import {
   Boxes,
@@ -47,13 +48,16 @@ type Props = {
 export function Sidebar({ active, onNavigate }: Props) {
   return (
     <aside className="flex h-dvh w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-3 px-6 py-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sidebar-primary">
-          <Boxes className="h-5 w-5 text-sidebar-primary-foreground" />
-        </div>
-        <div className="leading-tight">
-          <p className="text-lg font-bold tracking-tight">COBESA</p>
-          <p className="text-xs text-sidebar-foreground/60">PEÇAS</p>
+      <div className="px-4 py-6">
+        <div className="overflow-hidden rounded-xl border border-sidebar-border bg-black/40 shadow-sm">
+          <Image
+            src="/images/cobesa-logo.png"
+            alt="COBESA Logística"
+            width={568}
+            height={181}
+            priority
+            className="h-auto w-full"
+          />
         </div>
       </div>
 
